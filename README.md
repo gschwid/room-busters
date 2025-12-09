@@ -14,3 +14,22 @@ Phase 2:
 - Create velocity commands from the given path found by RRT*.
 ## Useful resources
 https://github.com/Minipada/gazebo_ros_2d_map
+
+
+This also serves as our documentation. 
+
+To start. We are running with different environments which is a first start place, getting environment configured. Grant is fancy and dual booting, and has ROS installed from his previous research experience. Henry, in a blunder downloaded it using WSL2, and also plans to use lab machines. Corey is planning to use the lab machines!
+
+turtlebot waffle
+
+how to run:
+
+colcon build
+source /opt/ros/jazzy/setup.bash
+source install/setup.bash
+ros2 launch room-busters turtlebot_launch.py
+
+
+see a topic 
+    ros2 topic echo /scan
+//run teleop with
