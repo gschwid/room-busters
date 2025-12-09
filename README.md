@@ -33,3 +33,11 @@ ros2 launch room-busters turtlebot_launch.py
 see a topic 
     ros2 topic echo /scan
 //run teleop with
+    ros2 run rqt_console rqt_console
+
+//to run rvis 
+sudo apt install ros-jazzy-rviz2
+ros2 run rvis2 rvis2
+
+set the fixed frame to baselink
+and add the topic laserscan from topic 

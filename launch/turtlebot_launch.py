@@ -24,15 +24,14 @@ def generate_launch_description():
     )
 
     # Node to control the robot
-    simple_mover_node = Node(
+    dumb_vacuum = Node(
         package='room-busters',
         executable='dumb_vacuum',
         name='dumb_vacuum',
-        output='screen'
     )
 
     ld = LaunchDescription()
     ld.add_action(turtlebot3_sim)
-    ld.add_action(simple_mover_node)
+    ld.add_action(dumb_vacuum)
 
     return ld

@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import TwistStamped
 from sensor_msgs.msg import LaserScan
 
 # need to publish to cmd_vel 
@@ -8,35 +8,47 @@ from sensor_msgs.msg import LaserScan
 class dumb_vacuum(Node):
     def __init__(self):
         super().__init__('test')
-        self.publisher_ = self.create_publisher(Twist, 'cmd_vel', 10)
-        self.subscription = self.create_subscription(
+
+        self.cmd_pub = self.create_publisher(TwistStamped, 'cmd_vel', 10)
+        self.laser_sub = self.create_subscription(
             LaserScan,
             'scan',
             self.scan_callback,
             10)
-        self.subscription  # prevent unused variable warning
-        timer_period = 0.5  # seconds
-        self.timer = self.create_timer(timer_period, self.timer_callback)
-        self.get_logger().info('test node has been started.')
+
+
+        self.laser_sub  # prevent unused variable warning
 
     def scan_callback(self, msg):
         # msg.ranges contains the distance readings
         # For TurtleBot3, index 0 is usually directly in front
         # Values are in meters
+        # from the scan object we get angle min = 0 and max = 6.28
+        # we get angle increment 0.017, this is about 1 degree 
+        # so i will scan in the front 20 degrees that is -10 -> 0 
+        # which is index 350-: and then 0->10 is  0:10
         if msg.ranges:
-            distance_ahead = msg.ranges[0]
-            self.get_logger().info(f'Distance ahead: {distance_ahead}')
+            self.distances_in_range = msg.ranges[340:] + msg.ranges[0:20]
+            self.get_logger().info(f'Distance ahead: {self.distances_in_range}')
+            move_message = TwistStamped()
+            move_message.header.stamp = self.get_clock().now().to_msg()
 
-    def timer_callback(self):
-        msg = Twist()
-        msg.linear.x = 0.1
-        msg.angular.z = 0.1
-        self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg)
+            if(min(self.distances_in_range) > 0.7):
+                self.get_logger().info(f'dis working?: {min(self.distances_in_range)}')
+
+                # keep moving forward
+                move_message.twist.linear.x = 0.5
+                move_message.twist.angular.z = 0.0
+            else:
+                # rotate i guess until there is nothing in front of us?
+                move_message.twist.linear.x = 0.0
+                move_message.twist.angular.z = 0.5
+            self.cmd_pub.publish(move_message)
+            
 
 def main(args=None):
     rclpy.init(args=args)
-    test = Test()
+    test = dumb_vacuum()
     rclpy.spin(test)
     test.destroy_node()
     rclpy.shutdown()

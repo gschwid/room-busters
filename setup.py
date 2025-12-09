@@ -24,7 +24,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'simple_mover = room_busters.simple_mover:main',
+            'dumb_vacuum = room_busters.dumb_vacuum:main',
         ],
     },
 )
