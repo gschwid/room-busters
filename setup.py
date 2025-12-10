@@ -24,7 +24,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'dumb_vacuum = room_busters.dumb_vacuum:main',
+            'dumb_vacuum_v2 = room_busters.dumb_vacuum_v2:main',
         ],
     },
 )

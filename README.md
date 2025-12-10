@@ -1,6 +1,9 @@
 # Final project for CSCI 4551
 
 ## Todo
+tutorial for getting running with wsl 
+
+https://docs.ros.org/en/iron/Tutorials/Advanced/Simulators/Webots/Installation-Windows.html
 
 - Implement a way to give the robot a destination coordinate to traverse too.
 - Figure out how to get map of the envoirnment in simulation (fed to path planner?)
@@ -25,9 +28,13 @@ turtlebot waffle
 how to run:
 
 colcon build
+
 source /opt/ros/jazzy/setup.bash
+
 source install/setup.bash
+
 ros2 launch room-busters turtlebot_launch.py
+
 
 
 see a topic 
@@ -35,9 +42,10 @@ see a topic
 //run teleop with
     ros2 run rqt_console rqt_console
 
-//to run rvis 
+//to run rviz
 sudo apt install ros-jazzy-rviz2
-ros2 run rvis2 rvis2
+ros2 run rviz2 rviz2
 
 set the fixed frame to baselink
 and add the topic laserscan from topic 
+killall -9 ruby

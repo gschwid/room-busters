@@ -26,8 +26,8 @@ def generate_launch_description():
     # Node to control the robot
     dumb_vacuum = Node(
         package='room-busters',
-        executable='dumb_vacuum',
-        name='dumb_vacuum',
+        executable='dumb_vacuum_v2',
+        name='dumb_vacuum_v2',
     )
 
     ld = LaunchDescription()

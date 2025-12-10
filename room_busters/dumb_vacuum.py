@@ -32,7 +32,7 @@ class dumb_vacuum(Node):
         # which is index 350-: and then 0->10 is  0:10
         if msg.ranges:
             self.distances_in_range = msg.ranges[340:] + msg.ranges[0:20]
-            self.get_logger().info(f'Distance ahead: {self.distances_in_range}')
+            # self.get_logger().info(f'Distance ahead: {self.distances_in_range}')
             move_message = TwistStamped()
             move_message.header.stamp = self.get_clock().now().to_msg()
 
@@ -40,7 +40,7 @@ class dumb_vacuum(Node):
                 self.get_logger().info(f'dis working?: {min(self.distances_in_range)}')
 
                 # keep moving forward
-                move_message.twist.linear.x = 5
+                move_message.twist.linear.x = 5.0
                 move_message.twist.angular.z = 0.0
             else:
                 # rotate i guess until there is nothing in front of us?
@@ -49,7 +49,7 @@ class dumb_vacuum(Node):
                 # other potentials are visualizing all of the places that we have been
                 
                 move_message.twist.linear.x = 0.0
-                move_message.twist.angular.z = 1
+                move_message.twist.angular.z = 1.0
             self.cmd_pub.publish(move_message)
             
 
