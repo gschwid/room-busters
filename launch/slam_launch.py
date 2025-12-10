@@ -16,6 +16,9 @@ def generate_launch_description():
                 #{"database_path": "/workspace"}, # For saving/loading
                 {"subscribe_depth": False},
                 {"subscribe_scan": True},
+                {"queue_size": 30},
+                {"approx_sync": True},
+                {"use_sim_time": True}
             ],
             # Remap topics to your robot's actual topics
             remappings=[
