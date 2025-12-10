@@ -1,14 +1,16 @@
-#Author: Henry Mahnke
-
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import TwistStamped
 from sensor_msgs.msg import LaserScan
 
+# The purpose of this node is to build off of dumb_vacuum to be slightly less dumb
+# the proposed way of doing this, is to instead of looking straight forward, and viewing through a small
+# field of view that leads to the robot "sticking" to the edges, what if we used the whole lidar, found the max 
+# in a sliding window, say of 10 degrees, and then move in the center of that direction
+# if there are multiple sliding windows that are optimal, we choose arbitrarily. 
+# this adds a sense of randomness and might become completeness?!? total guess, but hopefully better
 
-# need to publish to cmd_vel 
-# want to get values from the lidar
-class dumb_vacuum(Node):
+class dumb_vacuum_v2(Node):
     def __init__(self):
         super().__init__('test')
 
@@ -31,6 +33,8 @@ class dumb_vacuum(Node):
         # so i will scan in the front 20 degrees that is -10 -> 0 
         # which is index 350-: and then 0->10 is  0:10
         if msg.ranges:
+            # find max in sliding window 
+            sliding_window_len = 10
             self.distances_in_range = msg.ranges[340:] + msg.ranges[0:20]
             self.get_logger().info(f'Distance ahead: {self.distances_in_range}')
             move_message = TwistStamped()

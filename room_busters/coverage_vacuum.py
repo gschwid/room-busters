@@ -1,14 +1,19 @@
-#Author: Henry Mahnke
-
+# this node is to build off the dumb vacuum using grant's map 
+# I was originally going to use a package to do the coverage path planning 
+# but where is the fun in that?!?!
+# for this my idea is to try to sample in a rectangular fashion from the grid 
+# that i get from grant. Then i will path plan between those points. just point to point traversal 
+# with nav2. But you will run into obstacles won't you!?!
+# yes, in the case that I approach an obstacle i will use the "dumb" algorithm to just turn and move 
+# straight to try to get around it, before i go back to tracking that position. 
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import TwistStamped
 from sensor_msgs.msg import LaserScan
-
-
+from nav_msgs.msg import OccupancyGrid
 # need to publish to cmd_vel 
 # want to get values from the lidar
-class dumb_vacuum(Node):
+class coverage_vacuum(Node):
     def __init__(self):
         super().__init__('test')
 
@@ -19,17 +24,15 @@ class dumb_vacuum(Node):
             self.scan_callback,
             10)
 
-
         self.laser_sub  # prevent unused variable warning
+        self.map_sub = self.create_subscription(
+            OccupancyGrid, 
+            'occupancy',
+            self.map_callback,
+            10
+        )
 
-    def scan_callback(self, msg):
-        # msg.ranges contains the distance readings
-        # For TurtleBot3, index 0 is usually directly in front
-        # Values are in meters
-        # from the scan object we get angle min = 0 and max = 6.28
-        # we get angle increment 0.017, this is about 1 degree 
-        # so i will scan in the front 20 degrees that is -10 -> 0 
-        # which is index 350-: and then 0->10 is  0:10
+    def map_callback(self, msg):
         if msg.ranges:
             self.distances_in_range = msg.ranges[340:] + msg.ranges[0:20]
             self.get_logger().info(f'Distance ahead: {self.distances_in_range}')
@@ -40,7 +43,7 @@ class dumb_vacuum(Node):
                 self.get_logger().info(f'dis working?: {min(self.distances_in_range)}')
 
                 # keep moving forward
-                move_message.twist.linear.x = 5
+                move_message.twist.linear.x = 1
                 move_message.twist.angular.z = 0.0
             else:
                 # rotate i guess until there is nothing in front of us?
@@ -49,7 +52,7 @@ class dumb_vacuum(Node):
                 # other potentials are visualizing all of the places that we have been
                 
                 move_message.twist.linear.x = 0.0
-                move_message.twist.angular.z = 1
+                move_message.twist.angular.z = 0.65
             self.cmd_pub.publish(move_message)
             
 
