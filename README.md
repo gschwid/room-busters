@@ -63,6 +63,7 @@ In one terminal...
 Navigate to your workspace
 
 colcon build (This only needs to be ran once)
+
 source install/local_setup.bash
 ros2 launch room-busters enviornment_launch.py
 
