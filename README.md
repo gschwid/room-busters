@@ -65,6 +65,7 @@ Navigate to your workspace
 colcon build (This only needs to be ran once)
 
 source install/local_setup.bash
+
 ros2 launch room-busters enviornment_launch.py
 
 In another terminal...
@@ -72,6 +73,7 @@ In another terminal...
 Navigate to your workspace
 
 source install/local_setup.bash
+
 ros2 launch room-busters slam_launch.py
 
 If it works you should see an occupancy grid with the turtlebot TF frames in it (fingers crossed)
