@@ -49,3 +49,31 @@ ros2 run rviz2 rviz2
 set the fixed frame to baselink
 and add the topic laserscan from topic 
 killall -9 ruby
+
+## How to run SLAM stuff
+
+Hopefully this works. Essentially I set up an already existing map, and have RTABMAP set to localize the turtlebot using this map. This is how you run it
+
+Dependencies...
+
+sudo apt install ros-jazzy-rtabmap-ros
+
+In one terminal...
+
+Navigate to your workspace
+
+colcon build (This only needs to be ran once)
+source install/local_setup.bash
+ros2 launch room-busters enviornment_launch.py
+
+In another terminal...
+
+Navigate to your workspace
+
+source install/local_setup.bash
+ros2 launch room-busters slam_launch.py
+
+If it works you should see an occupancy grid with the turtlebot TF frames in it (fingers crossed)
+
+To get occupancy grid data, sub to the /map topic
+
