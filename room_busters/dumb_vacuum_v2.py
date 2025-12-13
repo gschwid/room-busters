@@ -34,7 +34,19 @@ class dumb_vacuum_v2(Node):
         self.compute_new_set = False
         self.angle_setpoint = 0.0
 
+        # Store odometry so ET can find home. Effecively, init will be goal during pathing.
+        # I think init and final should suffice as inputs to a path planning algorithm.
+        self.initx = None
+        self.inity = None
+        self.finalx = None
+        self.finaly = None
 
+        # But when should ET go home? After the vacuum is done. We assume that when the program
+        # runs, vacuuming is occuring up until a certain point.
+        self.vacuuming = True
+
+        # But when do we set self.vacuuming to false and use path planning?
+        
         self.laser_sub  # prevent unused variable warning
         self.odom_message = Odometry()
     def get_yaw(self):
@@ -108,6 +120,17 @@ class dumb_vacuum_v2(Node):
             self.cmd_pub.publish(move_message)
     def odom_callback(self,msg): 
         self.odom_message = msg
+
+        # odom_callback is where location subscription occurs. So this would be the place to set our variables.
+        # if self.initx == None or self.inity = None :
+        #    self.initx = self.odom_message.pose.pose.position.x
+        #    self.inity = self.odom_message.pose.pose.position.y
+        # 
+        # self.finalx = self.odom_message.pose.pose.position.x
+        # self.finaly = self.odom_message.pose.pose.position.y
+ 
+
+    
 
 
 def main(args=None):
