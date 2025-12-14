@@ -40,30 +40,6 @@ def generate_launch_description():
             output='screen',
         ),
         Node(
-            package='rtabmap_viz',
-            executable='rtabmap_viz',
-            name='rtabmap_viz',
-            parameters=[
-                {"frame_id": "base_link"},
-                {"odom_frame_id": "odom"},
-                {"subscribe_scan": True},
-                {"subscribe_depth": False},
-                {"subscribe_stereo": False},
-                {"subscribe_rgbd": False},
-                {"queue_size": 10},
-                {"approx_sync": True},
-                {"use_sim_time": True}
-            ],
-            remappings=[
-                ("/rgb/image", "/camera/image_raw"),
-                ("/rgb/camera_info", "/camera/camera_info"),
-                ("/imu", "/DONTLOOK"), # It was auto subscribing to the IMU when the proper transformations werent set up.
-                ("/scan", "/scan"),
-                ("/odom", "/odom")
-            ],
-            output='screen',
-        ),
-        Node(
             package='rviz2',
             executable='rviz2',
             name='rviz_display',
