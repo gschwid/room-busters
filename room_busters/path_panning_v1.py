@@ -11,7 +11,7 @@ import numpy as np
 
 # TODO: Finish porting over movement logic. Then implement algorithm.
 
-class trivial_environment_v1(Node):
+class path_planning_v1(Node):
     def __init__(self):
         super().__init__('test')
 
@@ -63,7 +63,7 @@ class trivial_environment_v1(Node):
         self.timer = self.create_timer(timer_period, self.trivial_environment_v1)
         
     
-    def trivial_environment_v1(self):
+    def path_planning_v1(self):
 
         # If we are still vacuuming, we follow a similar line of logic as vacuum().
         # I am deliberately trying to turn it into a trivial environment here though.
@@ -113,7 +113,7 @@ class trivial_environment_v1(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    test = trivial_environment_v1()
+    test = path_planning_v1()
     rclpy.spin(test)
     test.destroy_node()
     rclpy.shutdown()
