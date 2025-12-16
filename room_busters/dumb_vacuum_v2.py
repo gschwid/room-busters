@@ -6,6 +6,7 @@ from nav_msgs.msg import Odometry
 import random
 import math
 import numpy as np
+from enum import Enum
 # The purpose of this node is to build off of dumb_vacuum to be slightly less dumb
 # the proposed way of doing this, is to instead of looking straight forward, and viewing through a small
 # field of view that leads to the robot "sticking" to the edges, what if we used the whole lidar, found the max 
@@ -14,6 +15,11 @@ import numpy as np
 # this adds a sense of randomness and might become completeness?!? total guess, but hopefully better
 
 # 
+class state(Enum):
+    FindNewDir = 1
+    InFindDir = 2
+    FollowingDir = 3
+
 
 class dumb_vacuum_v2(Node):
     def __init__(self):
@@ -31,9 +37,8 @@ class dumb_vacuum_v2(Node):
             self.odom_callback,
             10
         )
-        self.compute_new_set = False
         self.angle_setpoint = 0.0
-
+        self.state = state.FindNewDir
         # Store odometry so ET can find home. Effecively, init will be goal during pathing.
         # I think init and final should suffice as inputs to a path planning algorithm.
         self.initx = None
@@ -70,65 +75,80 @@ class dumb_vacuum_v2(Node):
             # becuase otherwise we would avoid walls which isn't ideal
             move_message = TwistStamped()
             move_message.header.stamp = self.get_clock().now().to_msg()
-            if not self.compute_new_set:
+            distances_in_range = msg.ranges[340:] + msg.ranges[0:20]
 
+            if(min(distances_in_range) < 0.6):
+                self.get_logger().info(f'tripped find new Dir')
+                if self.state == state.FollowingDir:
+                    self.state = state.FindNewDir
+
+            if self.state == state.FindNewDir:
+                self.get_logger().info(f'in find new Dir')
+                
 
                 sliding_window_len = 10
-                min_dist = 0.5
+                min_dist = 0.6
+                # find a direction (10 ish degree window) 
+                # that has all distances larger than 1
                 valid_starting_indices = []
                 for i in range(len(msg.ranges)):
                     if i < len(msg.ranges):
                         arr = msg.ranges[i:i+10]
-                        is_valid_range = (np.array(arr) > min_dist).all
+                        is_valid_range = (np.array(arr) > min_dist).all()
                         if is_valid_range:
                             valid_starting_indices.append(i)
                     else:
                         first_arr = msg.ranges[i:]
                         second_arr = msg.ranges[0:sliding_window_len - len(first_arr)]
-                        arr = first_arr = second_arr
-                        is_valid_range = (arr > min_dist).all
+                        arr = first_arr + second_arr
+                        is_valid_range = (arr > min_dist).all()
                         if (is_valid_range):
                             valid_starting_indices.append(i)
                 # once we have the valid starting indices 
                 # we can select a random one 
                 self.get_logger().info(f'valid_starting_indices: {valid_starting_indices}')
-                rand_int = random.randint(0,len(valid_starting_indices))
-                self.get_logger().info(f'rand_int?: {rand_int}')
+                
+                if not valid_starting_indices:
+                    return
+
+                rand_list_idx = random.randint(0, len(valid_starting_indices)-1)
+                
+                chosen_scan_index = valid_starting_indices[rand_list_idx]
                 
                 # then we want to turn to the value of that 
-                angle_ind_to_turn_to = rand_int + 5
-                angle = msg.angle_increment * angle_ind_to_turn_to + msg.range_min
-                # then this must be relative to the current value of the robot, so we want to latch in a way 
-                # so that when we are turning we only do this once.
-                # then we need to PID the shiz out of this
-                # we want to get the current angle of the robot from odometry 
+                angle_ind_to_turn_to = chosen_scan_index + 5
+                angle_rad = msg.angle_increment * angle_ind_to_turn_to + msg.range_min
+                
+                # Convert to degrees before adding to yaw
+                angle_deg = math.degrees(angle_rad)
 
                 self.get_logger().info(f'dis working?: {self.get_yaw()}')
 
                 # so now the desired place we want to turn to
-                self.angle_setpoint = angle + self.get_yaw()
-                self.compute_new_set = True
-            else:
-                pgain = 0.025
+                self.angle_setpoint = angle_deg + self.get_yaw()
+                self.state = state.InFindDir
+            elif self.state == state.InFindDir:
+
+                self.get_logger().info(f'in Findx Dir')
+                pgain = 3.1
                 error = self.angle_setpoint - self.get_yaw()
+                # normalize error
+                error = (error + 180) % 360 - 180
+                error_rad = math.radians(error)
                 self.get_logger().info(f'error: {error}')
-                if error > 0.1: #some reasonable tolerance 
-                    move_message.twist.angular.z = error * pgain
+                
+                if abs(error) > 2.0: # 1 degree tolerance
+                    move_message.twist.angular.z = error_rad * pgain
                 else:
-                    move_message.twist.linear.x = 1.0
+                    self.state = state.FollowingDir
+            elif self.state == state.FollowingDir:
+                self.get_logger().info(f'in Following Dir')
+                move_message.twist.linear.x = 1.0
 
             self.cmd_pub.publish(move_message)
     def odom_callback(self,msg): 
         self.odom_message = msg
 
-        # odom_callback is where location subscription occurs. So this would be the place to set our variables.
-        # if self.initx == None or self.inity = None :
-        #    self.initx = self.odom_message.pose.pose.position.x
-        #    self.inity = self.odom_message.pose.pose.position.y
-        # 
-        # self.finalx = self.odom_message.pose.pose.position.x
-        # self.finaly = self.odom_message.pose.pose.position.y
- 
 
     
 
