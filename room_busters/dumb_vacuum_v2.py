@@ -62,12 +62,12 @@ class dumb_vacuum_v2(Node):
         # we get angle increment 0.017, this is about 1 degree 
         # so i will scan in the front 20 degrees that is -10 -> 0 
         # which is index 350-: and then 0->10 is  0:10
-        self.battery =self.battery-0.1
         # make the battery drain quite fast so that you can see it
         self.get_logger().info(f'battery: {self.battery}')
 
         battery_above_threshold = self.battery > self.recharge_val
         if msg.ranges and battery_above_threshold:
+            self.battery =self.battery-.1
             # find max in sliding window 
             # instead of finding the max sliding window we just want to find a valid sliding window 
             # becuase otherwise we would avoid walls which isn't ideal
@@ -145,7 +145,11 @@ class dumb_vacuum_v2(Node):
 
             self.cmd_pub.publish(move_message)
         else:
+            move_message = TwistStamped()
+            move_message.header.stamp = self.get_clock().now().to_msg()
             self.get_logger().info(f'buster out of battery')
+            self.cmd_pub.publish(move_message)
+
 
     def odom_callback(self,msg): 
         self.odom_message = msg
