@@ -37,18 +37,11 @@ class dumb_vacuum_v2(Node):
             self.odom_callback,
             10
         )
+        self.battery = 100
+        self.min_dist_lidar = 0.6
         self.angle_setpoint = 0.0
         self.state = state.FindNewDir
-        # Store odometry so ET can find home. Effecively, init will be goal during pathing.
-        # I think init and final should suffice as inputs to a path planning algorithm.
-        self.initx = None
-        self.inity = None
-        self.finalx = None
-        self.finaly = None
-
-        # But when should ET go home? After the vacuum is done. We assume that when the program
-        # runs, vacuuming is occuring up until a certain point.
-        self.vacuuming = True
+        self.recharge_val = 10
 
         # But when do we set self.vacuuming to false and use path planning?
         
@@ -69,7 +62,12 @@ class dumb_vacuum_v2(Node):
         # we get angle increment 0.017, this is about 1 degree 
         # so i will scan in the front 20 degrees that is -10 -> 0 
         # which is index 350-: and then 0->10 is  0:10
-        if msg.ranges:
+        self.battery =self.battery-0.1
+        # make the battery drain quite fast so that you can see it
+        self.get_logger().info(f'battery: {self.battery}')
+
+        battery_above_threshold = self.battery > self.recharge_val
+        if msg.ranges and battery_above_threshold:
             # find max in sliding window 
             # instead of finding the max sliding window we just want to find a valid sliding window 
             # becuase otherwise we would avoid walls which isn't ideal
@@ -77,7 +75,7 @@ class dumb_vacuum_v2(Node):
             move_message.header.stamp = self.get_clock().now().to_msg()
             distances_in_range = msg.ranges[340:] + msg.ranges[0:20]
 
-            if(min(distances_in_range) < 0.6):
+            if(min(distances_in_range) < self.min_dist_lidar):
                 self.get_logger().info(f'tripped find new Dir')
                 if self.state == state.FollowingDir:
                     self.state = state.FindNewDir
@@ -87,21 +85,20 @@ class dumb_vacuum_v2(Node):
                 
 
                 sliding_window_len = 10
-                min_dist = 0.6
                 # find a direction (10 ish degree window) 
                 # that has all distances larger than 1
                 valid_starting_indices = []
                 for i in range(len(msg.ranges)):
-                    if i < len(msg.ranges):
-                        arr = msg.ranges[i:i+10]
-                        is_valid_range = (np.array(arr) > min_dist).all()
+                    if i+sliding_window_len <= len(msg.ranges):
+                        arr = msg.ranges[i:i+sliding_window_len]
+                        is_valid_range = (np.array(arr) > self.min_dist_lidar).all()
                         if is_valid_range:
                             valid_starting_indices.append(i)
                     else:
                         first_arr = msg.ranges[i:]
                         second_arr = msg.ranges[0:sliding_window_len - len(first_arr)]
                         arr = first_arr + second_arr
-                        is_valid_range = (arr > min_dist).all()
+                        is_valid_range = (np.array(arr) > self.min_dist_lidar).all()
                         if (is_valid_range):
                             valid_starting_indices.append(i)
                 # once we have the valid starting indices 
@@ -133,6 +130,7 @@ class dumb_vacuum_v2(Node):
                 pgain = 3.1
                 error = self.angle_setpoint - self.get_yaw()
                 # normalize error
+                # the error for the
                 error = (error + 180) % 360 - 180
                 error_rad = math.radians(error)
                 self.get_logger().info(f'error: {error}')
@@ -146,6 +144,9 @@ class dumb_vacuum_v2(Node):
                 move_message.twist.linear.x = 1.0
 
             self.cmd_pub.publish(move_message)
+        else:
+            self.get_logger().info(f'buster out of battery')
+
     def odom_callback(self,msg): 
         self.odom_message = msg
 
