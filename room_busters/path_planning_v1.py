@@ -60,7 +60,7 @@ class path_planning_v1(Node):
         # https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Writing-A-Simple-Py-Publisher-And-Subscriber.html
         timer_period = 0.5
         self.i = 0
-        self.timer = self.create_timer(timer_period, self.trivial_environment_v1)
+        self.timer = self.create_timer(timer_period, self.path_planning_v1)
         
     
     def path_planning_v1(self):
