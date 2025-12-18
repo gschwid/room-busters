@@ -7,7 +7,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource # th
 from launch_ros.actions import Node
 
 def generate_launch_description():
-    # Set TURTLEBOT3_MODEL if not set
+    # ensure that turtlebot is set to waffle
     if 'TURTLEBOT3_MODEL' not in os.environ:
         os.environ['TURTLEBOT3_MODEL'] = 'waffle'
 
@@ -24,22 +24,16 @@ def generate_launch_description():
     )
 
     # Node to control the robot
-    dumb_vacuum = Node(
-        package='room-busters',
-        executable='dumb_vacuum',
-        name='dumb_vacuum',
-    )
+    # dumb_vacuum = Node(
+    #     package='room-busters',
+    #     executable='dumb_vacuum',
+    #     name='dumb_vacuum',
+    # )
     dumb_vacuum_v2 = Node(
         package='room-busters',
         executable='dumb_vacuum_v2',
         name='dumb_vacuum_v2'
     )
-    # coverage_vacuum = Node(
-    #     package='room-busters',
-    #     executable='coverage_vacuum',
-    #     name='CoverageVacuum',
-    #     output='screen'
-    # )    
 
 
     ld = LaunchDescription()
