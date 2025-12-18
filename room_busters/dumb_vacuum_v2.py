@@ -76,13 +76,12 @@ class dumb_vacuum_v2(Node):
             distances_in_range = msg.ranges[340:] + msg.ranges[0:20]
 
             if(min(distances_in_range) < self.min_dist_lidar):
-                self.get_logger().info(f'tripped find new Dir')
+                self.get_logger().info(f'Need to find new direction...')
                 if self.state == state.FollowingDir:
                     self.state = state.FindNewDir
 
             if self.state == state.FindNewDir:
-                self.get_logger().info(f'in find new Dir')
-                
+                self.get_logger().info(f'Finding New Direction...')
 
                 sliding_window_len = 10
                 # find a direction (10 ish degree window) 
@@ -119,14 +118,12 @@ class dumb_vacuum_v2(Node):
                 # Convert to degrees before adding to yaw
                 angle_deg = math.degrees(angle_rad)
 
-                self.get_logger().info(f'dis working?: {self.get_yaw()}')
-
                 # so now the desired place we want to turn to
                 self.angle_setpoint = angle_deg + self.get_yaw()
                 self.state = state.InFindDir
             elif self.state == state.InFindDir:
 
-                self.get_logger().info(f'in Findx Dir')
+                self.get_logger().info(f'Moving to new Direction...')
                 pgain = 3.1
                 error = self.angle_setpoint - self.get_yaw()
                 # normalize error
@@ -135,19 +132,19 @@ class dumb_vacuum_v2(Node):
                 error_rad = math.radians(error)
                 self.get_logger().info(f'error: {error}')
                 
-                if abs(error) > 2.0: # 1 degree tolerance
+                if abs(error) > 1.0: # 1 degree tolerance
                     move_message.twist.angular.z = error_rad * pgain
                 else:
                     self.state = state.FollowingDir
             elif self.state == state.FollowingDir:
-                self.get_logger().info(f'in Following Dir')
+                self.get_logger().info(f'Following Chosen Direction...')
                 move_message.twist.linear.x = 1.0
 
             self.cmd_pub.publish(move_message)
         else:
             move_message = TwistStamped()
             move_message.header.stamp = self.get_clock().now().to_msg()
-            self.get_logger().info(f'buster out of battery')
+            self.get_logger().info(f'Buster out of battery')
             self.cmd_pub.publish(move_message)
 
 
