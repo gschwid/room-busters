@@ -50,7 +50,7 @@ set the fixed frame to baselink
 and add the topic laserscan from topic 
 killall -9 ruby
 
-## How to run SLAM stuff
+## How to run SLAM stuff:
 
 Hopefully this works. Essentially I set up an already existing map, and have RTABMAP set to localize the turtlebot using this map. This is how you run it
 
@@ -80,3 +80,6 @@ If it works you should see an occupancy grid with the turtlebot TF frames in it 
 
 To get occupancy grid data, sub to the /map topic
 
+## GAI Notice:
+
+Generative AI was not used in the creation of the final report. Please refer to each python file individually for specifics about any outside sources used in their creation.
