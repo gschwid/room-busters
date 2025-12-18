@@ -1,85 +1,36 @@
-# Final project for CSCI 4551
+# Running Room Busters Project
 
-## Todo
-tutorial for getting running with wsl 
+### Dependencies
 
-https://docs.ros.org/en/iron/Tutorials/Advanced/Simulators/Webots/Installation-Windows.html
-
-- Implement a way to give the robot a destination coordinate to traverse too.
-- Figure out how to get map of the envoirnment in simulation (fed to path planner?)
-
-
-- If time allows, SLAM the envoirnment to get a map of it. 
-
-
-Phase 2:
-- Implement the RRT* algorithm to find a path to the goal object.
-- Create velocity commands from the given path found by RRT*.
-## Useful resources
-https://github.com/Minipada/gazebo_ros_2d_map
-
-
-This also serves as our documentation. 
-
-To start. We are running with different environments which is a first start place, getting environment configured. Grant is fancy and dual booting, and has ROS installed from his previous research experience. Henry, in a blunder downloaded it using WSL2, and also plans to use lab machines. Corey is planning to use the lab machines!
-
-turtlebot waffle
-
-how to run:
-
-colcon build
-
-source /opt/ros/jazzy/setup.bash
-
-source install/setup.bash
-
-ros2 launch room-busters turtlebot_launch.py
-
-
-
-see a topic 
-    ros2 topic echo /scan
-//run teleop with
-    ros2 run rqt_console rqt_console
-
-//to run rviz
-sudo apt install ros-jazzy-rviz2
-ros2 run rviz2 rviz2
-
-set the fixed frame to baselink
-and add the topic laserscan from topic 
-killall -9 ruby
-
-## How to run SLAM stuff:
-
-Hopefully this works. Essentially I set up an already existing map, and have RTABMAP set to localize the turtlebot using this map. This is how you run it
-
-Dependencies...
+This project assumes you have both Gazeebo and ROS2 Jazzy installed. Only dependency beyond that is rtabmap, it can be installed with.
 
 sudo apt install ros-jazzy-rtabmap-ros
 
-In one terminal...
+Additionally, Henry experimented with using WSL, while it had it's issues (not being able to use the GPU due to package conflicts) it still worked well for not having to be in lab. Documentation for using ROS with WSL2 (and wslg) can be found here: https://docs.ros.org/en/iron/Tutorials/Advanced/Simulators/Webots/Installation-Windows.html
 
-Navigate to your workspace
 
-colcon build (This only needs to be ran once)
+### What does our code do?
+
+Displays the movement logic for Buster the robot when cleaning and exploring its envoirnment. It traverses the envoirnment by picking a direction, moving straight until it gets close to an obstacle, then rotating and moving a new random direction that contains no immediate obstacles. The robot uses lidar data to determine where the obstacles are around it. As it is cleaning the envoirnment, RTABMAP is used to localize itself within an existing map of the envoirnment.
+
+While it is running you will see both Buster traversing the Gazeebo envoirnment, and Buster being localized in a occupancy grid.
+
+
+### How to run it.
+
+move the room-busters package into {ros2_ws}/src
+
+cd {ros2_ws}
+
+colcon build
+
+If you must source ros2: source /opt/ros/jazzy/setup.bash
 
 source install/local_setup.bash
 
-ros2 launch room-busters enviornment_launch.py
+ros2 launch room-busters demo_launch.py
 
-In another terminal...
 
-Navigate to your workspace
 
-source install/local_setup.bash
 
-ros2 launch room-busters slam_launch.py
 
-If it works you should see an occupancy grid with the turtlebot TF frames in it (fingers crossed)
-
-To get occupancy grid data, sub to the /map topic
-
-## GAI Notice:
-
-Generative AI was not used in the creation of the final report. Please refer to each python file individually for specifics about any outside sources used in their creation.

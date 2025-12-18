@@ -21,7 +21,7 @@ class state(Enum):
 
 class dumb_vacuum_v2(Node):
     def __init__(self):
-        super().__init__('test')
+        super().__init__('dumb_vacuum_v2')
 
         self.cmd_pub = self.create_publisher(TwistStamped, 'cmd_vel', 10)
         self.laser_sub = self.create_subscription(

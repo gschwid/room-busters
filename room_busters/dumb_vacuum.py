@@ -10,7 +10,7 @@ from sensor_msgs.msg import LaserScan
 # want to get values from the lidar
 class dumb_vacuum(Node):
     def __init__(self):
-        super().__init__('test')
+        super().__init__('dumb_vacuum')
 
         self.cmd_pub = self.create_publisher(TwistStamped, 'cmd_vel', 10)
         self.laser_sub = self.create_subscription(
