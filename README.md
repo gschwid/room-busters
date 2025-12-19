@@ -31,6 +31,8 @@ source install/local_setup.bash
 ros2 launch room-busters demo_launch.py
 
 
+### Demo
 
+Video of the demo can be found [here](https://youtu.be/XhJTWDLpCZs)
 
 
